@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "node server.js",
+    "start": "serve -s dist -l tcp://0.0.0.0:${PORT:-8080}",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
@@ -19,6 +19,7 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.14.2",
+    "serve": "^14.2.6",
     "tailwindcss": "^4.2.4"
   },
   "devDependencies": {
