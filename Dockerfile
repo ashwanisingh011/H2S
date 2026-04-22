@@ -10,10 +10,5 @@ RUN npm run build
 FROM nginx:alpine
 # Copy the built files from the builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
-# Copy custom nginx config template
-COPY nginx.conf /etc/nginx/templates/default.conf.template
-# Expose the default Cloud Run port
-EXPOSE 8080
-# Nginx alpine image has a built-in entrypoint that processes templates in /etc/nginx/templates
-# and substitutes environment variables into /etc/nginx/conf.d/
-CMD ["nginx", "-g", "daemon off;"]
+# Inline command to guarantee the Nginx config uses the exact PORT provided by Cloud Run at startup
+CMD sh -c "echo \"server { listen \${PORT:-8080}; location / { root /usr/share/nginx/html; index index.html; try_files \\\$uri \\\$uri/ /index.html; } }\" > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
