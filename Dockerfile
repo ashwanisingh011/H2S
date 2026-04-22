@@ -16,5 +16,5 @@ COPY . .
 # Build the Vite React app
 RUN npm run build
 
-# Start the 'serve' static server, explicitly binding to 0.0.0.0 and the Cloud Run PORT
-CMD ["sh", "-c", "npx serve -s dist -l tcp://0.0.0.0:${PORT:-8080}"]
+# Start the native dependency-free HTTP server
+CMD ["node", "server.js"]
