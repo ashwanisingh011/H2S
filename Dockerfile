@@ -1,23 +1,19 @@
-# Use the official Node.js 20 image as a base
-FROM node:20-alpine
-
-# Set the working directory
+# Stage 1: Build the Vite React app
+FROM node:20-alpine as builder
 WORKDIR /app
-
-# Copy package.json and package-lock.json
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
-
-# Copy the rest of the application code
 COPY . .
-
-# Build the Vite React app
 RUN npm run build
 
-# Expose the port Cloud Run expects
+# Stage 2: Serve the app with Nginx
+FROM nginx:alpine
+# Copy the built files from the builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+# Copy custom nginx config template
+COPY nginx.conf /etc/nginx/templates/default.conf.template
+# Expose the default Cloud Run port
 EXPOSE 8080
-
-# Start the Express server to serve the built files
-CMD ["npm", "start"]
+# Nginx alpine image has a built-in entrypoint that processes templates in /etc/nginx/templates
+# and substitutes environment variables into /etc/nginx/conf.d/
+CMD ["nginx", "-g", "daemon off;"]
