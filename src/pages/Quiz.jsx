@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, ArrowRight, RotateCcw } from 'lucide-react';
@@ -6,7 +6,11 @@ import { quizQuestions } from '../data/electionData';
 import { saveScore } from '../firebase/db';
 import Leaderboard from '../components/Leaderboard';
 
-export default function Quiz() {
+/**
+ * Quiz component handling user assessment and score submission.
+ * Wrapped in React.memo to prevent unnecessary re-renders.
+ */
+const Quiz = memo(function Quiz() {
   const navigate = useNavigate();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -25,7 +29,8 @@ export default function Quiz() {
     }
   }, [currentQuestion, showScore]);
 
-  const handleAnswerClick = (index) => {
+  /** Memoized handler for answer selection */
+  const handleAnswerClick = useCallback((index) => {
     if (selectedAnswer !== null) return;
     setSelectedAnswer(index);
 
@@ -49,9 +54,10 @@ export default function Quiz() {
         localStorage.setItem('voterIQ', String(newScore));
       }
     }, 1200);
-  };
+  }, [currentQuestion, score, selectedAnswer]);
 
-  const handleSaveScore = async () => {
+  /** Memoized handler for saving score to global leaderboard */
+  const handleSaveScore = useCallback(async () => {
     if (saving || scoreSaved) return;
     setSaving(true);
     try {
@@ -63,16 +69,20 @@ export default function Quiz() {
     } finally {
       setSaving(false);
     }
-  };
+  }, [playerName, score, saving, scoreSaved]);
 
-  const resetQuiz = () => {
+  /** Memoized handler to reset the quiz state */
+  const resetQuiz = useCallback(() => {
     setCurrentQuestion(0);
     setScore(0);
     setShowScore(false);
     setSelectedAnswer(null);
     setPlayerName('');
     setScoreSaved(false);
-  };
+  }, []);
+
+  /** Memoized handler to return to home */
+  const goHome = useCallback(() => navigate('/'), [navigate]);
 
   return (
     <main id="main-content" className="min-h-screen flex items-center justify-center p-6">
@@ -148,7 +158,7 @@ export default function Quiz() {
                     <RotateCcw size={16} aria-hidden="true" /> Retake
                   </button>
                   <button
-                    onClick={() => navigate('/')}
+                    onClick={goHome}
                     aria-label="Return to the home page"
                     className="classic-button px-6 py-3 rounded text-sm font-medium flex items-center justify-center gap-2"
                   >
@@ -220,4 +230,6 @@ export default function Quiz() {
       </div>
     </main>
   );
-}
+});
+
+export default Quiz;

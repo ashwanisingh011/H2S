@@ -1,6 +1,13 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { AlertTriangle } from 'lucide-react';
 
+/**
+ * ErrorBoundary catches JavaScript errors anywhere in their child component tree,
+ * logs those errors, and displays a fallback UI instead of the component tree that crashed.
+ * 
+ * @component
+ */
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -45,5 +52,10 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
+
+ErrorBoundary.propTypes = {
+  /** The child components to render when there is no error */
+  children: PropTypes.node.isRequired,
+};
 
 export default ErrorBoundary;

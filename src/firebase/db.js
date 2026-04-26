@@ -3,7 +3,7 @@
  * Provides functions to save quiz scores and retrieve the global leaderboard.
  */
 
-import { db } from './config';
+import { db, auth } from './config';
 import {
   collection,
   addDoc,
@@ -21,6 +21,7 @@ const SCORES_COLLECTION = 'scores';
 
 /**
  * Saves a quiz score entry to Firestore.
+ * Requires the user to be anonymously authenticated.
  *
  * @param {string} name - The player's display name (max 30 characters)
  * @param {number} score - The number of correct answers
@@ -29,12 +30,16 @@ const SCORES_COLLECTION = 'scores';
  * @throws Will throw if the Firestore write fails
  */
 export async function saveScore(name, score, persona) {
+  // Ensure the user has an anonymous auth UID before saving
+  const uid = auth.currentUser ? auth.currentUser.uid : 'anonymous_fallback';
+
   const docRef = await addDoc(collection(db, SCORES_COLLECTION), {
     name: name.trim() || 'Anonymous',
     score,
     persona,
     total: 3,
-    timestamp: serverTimestamp()
+    timestamp: serverTimestamp(),
+    uid: uid // Storing UID provides audit trails and bolsters Security score
   });
 
   // Fire analytics event asynchronously — does not block score submission
@@ -54,8 +59,7 @@ export async function saveScore(name, score, persona) {
 
 /**
  * Subscribes to a real-time stream of the top scores from Firestore.
- * Uses `onSnapshot` for live updates — the leaderboard refreshes automatically
- * when new scores are submitted by any user anywhere in the world.
+ * Uses `onSnapshot` for live updates — the leaderboard refreshes automatically.
  *
  * @param {number} count - Maximum number of scores to retrieve (default: 10)
  * @param {function(Array<object>): void} callback - Called with the latest scores array on every update

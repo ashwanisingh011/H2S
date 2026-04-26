@@ -4,16 +4,16 @@
  * to ensure no secrets are committed to source control.
  *
  * @see https://firebase.google.com/docs/web/setup
- * @see .env.example for required environment variable names
  */
 
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-import { getAnalytics, isSupported } from 'firebase/analytics';
+import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
+import { getAuth, signInAnonymously } from 'firebase/auth';
+import { getPerformance } from 'firebase/performance';
 
 /**
  * Firebase project configuration sourced from environment variables.
- * All VITE_ prefixed variables are injected at build time by Vite.
  */
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -31,10 +31,21 @@ const app = initializeApp(firebaseConfig);
 /** Firestore database instance for reading and writing quiz scores */
 export const db = getFirestore(app);
 
+/** Firebase Authentication instance to secure writes via anonymous sign-in */
+export const auth = getAuth(app);
+
+// Sign in anonymously immediately so writes are authenticated
+signInAnonymously(auth).catch(error => {
+  console.error("Anonymous auth failed:", error);
+});
+
 /**
  * Firebase Analytics instance — only initialized in browser environments
- * that support the Analytics API (not available in all regions or SSR contexts).
+ * that support the Analytics API.
  */
-export const analytics = isSupported().then(yes => yes ? getAnalytics(app) : null);
+export const analytics = isAnalyticsSupported().then(yes => yes ? getAnalytics(app) : null);
+
+/** Firebase Performance Monitoring to automatically track page loads and network requests */
+export const perf = getPerformance(app);
 
 export default app;

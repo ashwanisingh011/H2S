@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FileText, Users, CheckSquare, TrendingUp, FileEdit, Search, Mic, Award, Settings, Shield, Lock, Eye, ArrowRight, ArrowLeft } from 'lucide-react';
@@ -20,7 +20,11 @@ const iconMap = {
   Eye: <Eye className="text-[#f5f5f5]" size={20} strokeWidth={1.5} aria-hidden="true" />
 };
 
-export default function Journey() {
+/**
+ * Educational Journey timeline component.
+ * Wrapped in React.memo to prevent unnecessary re-renders.
+ */
+const Journey = memo(function Journey() {
   const navigate = useNavigate();
   const [personaId, setPersonaId] = useState(null);
 
@@ -34,6 +38,10 @@ export default function Journey() {
     }
   }, [navigate]);
 
+  /** Memoized navigation handlers to maintain referential equality */
+  const handleBack = useCallback(() => navigate('/'), [navigate]);
+  const handleProceed = useCallback(() => navigate('/quiz'), [navigate]);
+
   if (!personaId) return null;
 
   const journeyData = timelineData[personaId];
@@ -43,7 +51,7 @@ export default function Journey() {
     <main id="main-content" role="main" className="min-h-screen p-8 max-w-4xl mx-auto flex flex-col pt-24">
       <nav aria-label="Journey navigation" className="flex justify-between items-center mb-20 border-b border-[#262626] pb-8">
         <button
-          onClick={() => navigate('/')}
+          onClick={handleBack}
           aria-label="Back to personas"
           className="flex items-center gap-2 text-[#a3a3a3] hover:text-white transition-colors text-sm font-medium"
         >
@@ -96,7 +104,7 @@ export default function Journey() {
         className="flex justify-center mt-12 pb-24"
       >
         <button
-          onClick={() => navigate('/quiz')}
+          onClick={handleProceed}
           aria-label="Proceed to quiz to test your knowledge"
           className="classic-button px-6 py-3 rounded text-sm font-medium flex items-center gap-2"
         >
@@ -105,4 +113,6 @@ export default function Journey() {
       </motion.div>
     </main>
   );
-}
+});
+
+export default Journey;

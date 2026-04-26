@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { UserCircle, Megaphone, ShieldCheck } from 'lucide-react';
@@ -11,14 +11,22 @@ const iconMap = {
   ShieldCheck: <ShieldCheck size={40} className="text-white mb-6 opacity-80" strokeWidth={1.5} aria-hidden="true" />
 };
 
-export default function Home() {
+/**
+ * Home page component serving as the entry point.
+ * Wrapped in React.memo to prevent unnecessary re-renders.
+ */
+const Home = memo(function Home() {
   const navigate = useNavigate();
 
-  const handleSelectPersona = (id) => {
+  /** 
+   * Memoized handler for persona selection to maintain referential equality 
+   * across renders.
+   */
+  const handleSelectPersona = useCallback((id) => {
     localStorage.setItem('selectedPersona', id);
     trackPersonaSelected(id);
     navigate('/journey');
-  };
+  }, [navigate]);
 
   return (
     <main id="main-content" className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
@@ -64,4 +72,6 @@ export default function Home() {
       </section>
     </main>
   );
-}
+});
+
+export default Home;
