@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Scores collection — public leaderboard
+    match /scores/{scoreId} {
+      // Anyone can read scores (public leaderboard)
+      allow read: if true;
+
+      // Anyone can create a new score entry with valid data
+      allow create: if
+        request.resource.data.keys().hasAll(['name', 'score', 'persona', 'total', 'timestamp']) &&
+        request.resource.data.name is string &&
+        request.resource.data.name.size() <= 30 &&
+        request.resource.data.score is int &&
+        request.resource.data.score >= 0 &&
+        request.resource.data.score <= 10 &&
+        request.resource.data.persona in ['voter', 'candidate', 'officer'] &&
+        request.resource.data.total is int;
+
+      // Scores cannot be updated or deleted once submitted
+      allow update, delete: if false;
+    }
+
+    // Deny access to all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -8,16 +8,21 @@
     <meta name="theme-color" content="#0a0a0a" />
     <title>Election Process Education | Learn Democracy</title>
 
-    <!-- Google tag (gtag.js) for GA4 Analytics -->
+    <!-- Google Fonts — Inter for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Google Analytics 4 (GA4) — tracks page views and user engagement -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-J4H1DJ1NRG"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-J4H1DJ1NRG');
+      gtag('config', 'G-J4H1DJ1NRG', { send_page_view: true });
     </script>
 
-    <!-- Google Translate Widget -->
+    <!-- Google Translate Widget — multi-language support for all Indian regional languages -->
     <script type="text/javascript">
       function googleTranslateElementInit() {
         new google.translate.TranslateElement({
@@ -31,10 +36,9 @@
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
   </head>
   <body>
-    <!-- Skip to main content link for screen readers -->
+    <!-- Skip to main content — WCAG 2.1 accessibility requirement -->
     <a
       href="#main-content"
-      class="skip-link"
       style="position:absolute;top:-40px;left:0;background:#ffffff;color:#000000;padding:8px 16px;z-index:9999;font-size:14px;font-weight:600;border-radius:0 0 4px 0;transition:top 0.2s;"
       onfocus="this.style.top='0'"
       onblur="this.style.top='-40px'"

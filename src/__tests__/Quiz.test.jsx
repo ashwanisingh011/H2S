@@ -17,6 +17,7 @@ vi.mock('../firebase/db', () => ({
   saveScore: vi.fn().mockResolvedValue({ id: 'mock-doc-id' }),
   trackPersonaSelected: vi.fn(),
   trackJourneyStarted: vi.fn(),
+  subscribeToTopScores: vi.fn(() => () => {}),
 }));
 
 const mockNavigate = vi.fn();

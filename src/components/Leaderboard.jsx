@@ -1,18 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { getTopScores } from '../firebase/db';
+import { subscribeToTopScores } from '../firebase/db';
 import { Trophy, Medal } from 'lucide-react';
 
-const personaLabels = { voter: 'Voter', candidate: 'Candidate', officer: 'Officer' };
+/** Maps persona IDs to display labels */
+const personaLabels = {
+  voter: 'Voter',
+  candidate: 'Candidate',
+  officer: 'Officer'
+};
 
+/**
+ * Leaderboard component that displays the top 10 global quiz scores.
+ * Uses a real-time Firestore subscription so the list updates live
+ * whenever any user submits a new score anywhere in the world.
+ *
+ * @returns {JSX.Element} The rendered leaderboard section
+ */
 export default function Leaderboard() {
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getTopScores(10).then(data => {
+    // Subscribe to real-time updates — unsubscribe on component unmount
+    const unsubscribe = subscribeToTopScores(10, (data) => {
       setScores(data);
       setLoading(false);
     });
+
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -24,11 +39,15 @@ export default function Leaderboard() {
         </h2>
 
         {loading ? (
-          <p className="text-[#a3a3a3] text-sm text-center py-6" aria-live="polite">Loading scores...</p>
+          <p className="text-[#a3a3a3] text-sm text-center py-6" aria-live="polite" role="status">
+            Loading scores…
+          </p>
         ) : scores.length === 0 ? (
-          <p className="text-[#a3a3a3] text-sm text-center py-6">No scores yet. Be the first!</p>
+          <p className="text-[#a3a3a3] text-sm text-center py-6">
+            No scores yet. Be the first!
+          </p>
         ) : (
-          <ol aria-label="Top scores" className="space-y-3">
+          <ol aria-label="Top 10 global scores" className="space-y-3">
             {scores.map((entry) => (
               <li
                 key={entry.id}
@@ -36,17 +55,27 @@ export default function Leaderboard() {
               >
                 <div className="flex items-center gap-3">
                   <span
-                    className={`text-sm font-bold w-6 text-center ${entry.rank === 1 ? 'text-yellow-400' : entry.rank === 2 ? 'text-slate-300' : entry.rank === 3 ? 'text-amber-600' : 'text-[#a3a3a3]'}`}
+                    className={`text-sm font-bold w-6 text-center ${
+                      entry.rank === 1 ? 'text-yellow-400'
+                      : entry.rank === 2 ? 'text-slate-300'
+                      : entry.rank === 3 ? 'text-amber-600'
+                      : 'text-[#a3a3a3]'
+                    }`}
                     aria-label={`Rank ${entry.rank}`}
                   >
-                    {entry.rank <= 3 ? <Medal size={16} className="inline" aria-hidden="true" /> : `#${entry.rank}`}
+                    {entry.rank <= 3
+                      ? <Medal size={16} className="inline" aria-hidden="true" />
+                      : `#${entry.rank}`}
                   </span>
                   <div>
                     <p className="text-white text-sm font-medium">{entry.name}</p>
                     <p className="text-[#a3a3a3] text-xs">{personaLabels[entry.persona] || 'Unknown'}</p>
                   </div>
                 </div>
-                <span className="text-white font-bold text-sm" aria-label={`Score: ${entry.score} out of ${entry.total}`}>
+                <span
+                  className="text-white font-bold text-sm"
+                  aria-label={`Score: ${entry.score} out of ${entry.total}`}
+                >
                   {entry.score}/{entry.total}
                 </span>
               </li>
