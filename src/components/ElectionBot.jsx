@@ -37,7 +37,7 @@ const ElectionBot = memo(function ElectionBot() {
 
     try {
       // Initialize Gemini API
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      const apiKey = (window.__ENV__ && window.__ENV__.VITE_GEMINI_API_KEY) || import.meta.env.VITE_GEMINI_API_KEY;
       if (!apiKey) {
         throw new Error('Gemini API key is missing.');
       }

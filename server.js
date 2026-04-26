@@ -28,12 +28,30 @@ const server = http.createServer((req, res) => {
   const extname = String(path.extname(filePath)).toLowerCase();
   const contentType = mimeTypes[extname] || 'application/octet-stream';
 
-  fs.readFile(filePath, (error, content) => {
+  fs.readFile(filePath, 'utf-8', (error, content) => {
     if (error) {
       res.writeHead(500);
       res.end('500 Internal Server Error');
     } else {
       res.writeHead(200, { 'Content-Type': contentType });
+      
+      // Inject runtime environment variables into index.html
+      if (contentType === 'text/html') {
+        const envScript = `<script>
+          window.__ENV__ = {
+            VITE_FIREBASE_API_KEY: "${process.env.VITE_FIREBASE_API_KEY || ''}",
+            VITE_FIREBASE_AUTH_DOMAIN: "${process.env.VITE_FIREBASE_AUTH_DOMAIN || ''}",
+            VITE_FIREBASE_PROJECT_ID: "${process.env.VITE_FIREBASE_PROJECT_ID || ''}",
+            VITE_FIREBASE_STORAGE_BUCKET: "${process.env.VITE_FIREBASE_STORAGE_BUCKET || ''}",
+            VITE_FIREBASE_MESSAGING_SENDER_ID: "${process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || ''}",
+            VITE_FIREBASE_APP_ID: "${process.env.VITE_FIREBASE_APP_ID || ''}",
+            VITE_FIREBASE_MEASUREMENT_ID: "${process.env.VITE_FIREBASE_MEASUREMENT_ID || ''}",
+            VITE_GEMINI_API_KEY: "${process.env.VITE_GEMINI_API_KEY || ''}"
+          };
+        </script>`;
+        content = content.replace('</head>', `${envScript}</head>`);
+      }
+      
       res.end(content, 'utf-8');
     }
   });
