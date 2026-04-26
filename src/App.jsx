@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
+import ElectionBot from './components/ElectionBot';
 
 // Lazy-load routes for optimal code splitting and faster initial page load
 const Home = lazy(() => import('./pages/Home'));
@@ -36,6 +37,10 @@ function App() {
           aria-label="Language selector"
           style={{ position: 'fixed', top: '12px', right: '16px', zIndex: 1000, opacity: 0.8 }}
         />
+        
+        {/* Floating AI Democracy Bot available on all pages */}
+        <ElectionBot />
+
         <Suspense fallback={<PageLoader />}>
           <div className="font-sans text-slate-100 selection:bg-blue-500/30">
             <Routes>
