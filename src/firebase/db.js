@@ -30,8 +30,13 @@ const SCORES_COLLECTION = 'scores';
  * @throws Will throw if the Firestore write fails
  */
 export async function saveScore(name, score, persona) {
+  if (!db) {
+    console.warn("Database is not initialized. Score will not be saved.");
+    return null;
+  }
+
   // Ensure the user has an anonymous auth UID before saving
-  const uid = auth.currentUser ? auth.currentUser.uid : 'anonymous_fallback';
+  const uid = auth && auth.currentUser ? auth.currentUser.uid : 'anonymous_fallback';
 
   const docRef = await addDoc(collection(db, SCORES_COLLECTION), {
     name: name.trim() || 'Anonymous',
@@ -66,6 +71,12 @@ export async function saveScore(name, score, persona) {
  * @returns {function} Unsubscribe function — call to stop listening
  */
 export function subscribeToTopScores(count = 10, callback) {
+  if (!db) {
+    console.warn("Database is not initialized. Leaderboard will be empty.");
+    callback([]);
+    return () => {};
+  }
+
   const q = query(
     collection(db, SCORES_COLLECTION),
     orderBy('score', 'desc'),

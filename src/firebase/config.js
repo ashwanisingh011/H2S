@@ -26,26 +26,30 @@ const firebaseConfig = {
 };
 
 /** Initialized Firebase application instance */
-const app = initializeApp(firebaseConfig);
+let app;
+export let db = null;
+export let auth = null;
+export let analytics = null;
+export let perf = null;
 
-/** Firestore database instance for reading and writing quiz scores */
-export const db = getFirestore(app);
+try {
+  if (firebaseConfig.apiKey) {
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+    
+    // Sign in anonymously immediately so writes are authenticated
+    signInAnonymously(auth).catch(error => {
+      console.warn("Anonymous auth failed (likely expected if config is incomplete):", error);
+    });
 
-/** Firebase Authentication instance to secure writes via anonymous sign-in */
-export const auth = getAuth(app);
-
-// Sign in anonymously immediately so writes are authenticated
-signInAnonymously(auth).catch(error => {
-  console.error("Anonymous auth failed:", error);
-});
-
-/**
- * Firebase Analytics instance — only initialized in browser environments
- * that support the Analytics API.
- */
-export const analytics = isAnalyticsSupported().then(yes => yes ? getAnalytics(app) : null);
-
-/** Firebase Performance Monitoring to automatically track page loads and network requests */
-export const perf = getPerformance(app);
+    analytics = isAnalyticsSupported().then(yes => yes ? getAnalytics(app) : null);
+    perf = getPerformance(app);
+  } else {
+    console.warn("Firebase configuration is missing. The app will run in degraded mode.");
+  }
+} catch (error) {
+  console.error("Firebase initialization failed:", error);
+}
 
 export default app;
